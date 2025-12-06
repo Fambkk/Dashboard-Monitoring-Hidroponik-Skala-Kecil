@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitoring Hidroponik Sawi - UI Dinamis</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+/* ---------------------------------------------------
+   PALET WARNA UTAMA (MODE TERANG)
+--------------------------------------------------- */
+:root {
+    --primary-green: #16a085; /* Hijau Utama */
+    --primary-green-dark: #0e7a63;
+    --accent-yellow: #f1c40f; /* Kuning Aksen */
+    
+    /* Perubahan warna Aksen Sidebar */
+    --sidebar-accent-color: #4a69bd; /* Biru Gelap/Ungu - Non Hijau/Putih */
+    --sidebar-accent-hover: #e0e6f6; /* Latar belakang hover lebih terang */
+
+    --bg-light: #f4f9f4; /* Background Halaman */
+    --card-bg: #ffffff; /* Background Card */
+    
+    /* **Warna Background Sidebar: Pale Green (Non-putih)** */
+    --sidebar-bg: #eaf6e8; 
+
+    --text-dark: #222; /* Teks Utama */
+    --text-light: #fdfdfd; /* Teks Pada Header */
+
+    --shadow-light: rgba(0, 0, 0, 0.1);
+    --shadow-medium: rgba(0, 0, 0, 0.15);
+    
+    /* **Lebar Sidebar Default (PC):** */
+    --sidebar-width: 180px; 
+    --header-height: 84px;
+}
+
+/* ---------------------------------------------------
+   MODE GELAP
+--------------------------------------------------- */
+.dark-mode {
+    --bg-light: #121212;
+    --card-bg: #1e1e1e;
+    --sidebar-bg: #1a1a1a; /* Darker background for sidebar in dark mode */
+    --text-dark: #e8e8e8;
+    --shadow-light: rgba(255, 255, 255, 0.08);
+    --shadow-medium: rgba(255, 255, 255, 0.12);
+    /* Penyesuaian Dark Mode untuk Sidebar */
+    --sidebar-accent-hover: #33395c; 
+}
+/* Menyesuaikan Status Badges di Dark Mode */
+.dark-mode .status-ideal { background-color: #1e6d42 !important; color: #a3e7a3 !important; }
+.dark-mode .status-warning { background-color: #634305 !important; color: #f9d77f !important; }
+.dark-mode .status-danger { background-color: #7a2018 !important; color: #ff9999 !important; }
+
+/* ---------------------------------------------------
+   BODY dan STRUKTUR UMUM
+--------------------------------------------------- */
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif; 
+    background: var(--bg-light);
+    color: var(--text-dark);
+    transition: background 0.3s, color 0.3s;
+}
+
+/* ---------------------------------------------------
+   HEADER
+--------------------------------------------------- */
+header {
+    background: linear-gradient(90deg, #1abc9c, var(--primary-green));
+    padding: 15px 20px; 
+    color: var(--text-light);
+    box-shadow: 0 6px 15px var(--shadow-medium);
+    position: sticky; 
+    top: 0;
+    z-index: 50; 
+    height: var(--header-height);
+    box-sizing: border-box; 
+    display: flex;
+    align-items: center;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="10" y="85" font-size="100" opacity="0.1" fill="white">🌿</text></svg>') repeat;
+    opacity: 0.15;
+    z-index: 1;
+    pointer-events: none;
+    background-size: 150px;
+}
+
+.header-content { 
+    position: relative; 
+    z-index: 2; 
+    max-width: 1300px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-group { 
+    display: flex; 
+    align-items: center; 
+    text-align: left; 
+    flex-grow: 1; 
+}
+
+/* PENTING: Perbaikan Ukuran Logo */
+.logo-um { 
+    width: 80px; 
+    height: auto; 
+    margin-right: 20px; 
+    flex-shrink: 0; 
+}
+
+.title-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.1;
+    overflow: hidden; 
+}
+
+header h1 {
+    font-size: 22px; 
+    font-weight: 800;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap; 
+}
+
+.subtitle {
+    font-size: 14px;
+    font-weight: 400;
+    margin-top: 2px;
+    opacity: 0.8;
+}
+
+.toggle-dark {
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--text-light);
+    box-shadow: 0 3px 8px var(--shadow-small);
+    cursor: pointer;
+    user-select: none;
+    z-index: 100;
+    font-weight: 600;
+    transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+    margin-left: 20px;
+    flex-shrink: 0;
+}
+
+/* ---------------------------------------------------
+   MAIN WRAPPER (CONTAINER UTAMA)
+--------------------------------------------------- */
+.main-wrapper {
+    display: flex;
+    min-height: calc(100vh - var(--header-height)); 
+    margin: 0; 
+}
+
+/* ---------------------------------------------------
+   SIDEBAR (Menu Navigasi Vertical)
+--------------------------------------------------- */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    padding: 15px 0;
+    box-shadow: 4px 0 15px var(--shadow-light);
+    position: sticky;
+    top: var(--header-height); 
+    height: calc(100vh - var(--header-height)); 
+    overflow-y: auto; 
+    z-index: 40;
+    flex-shrink: 0;
+}
+
+.sidebar button {
+    display: flex; 
+    align-items: center; 
+    width: 100%;
+    padding: 15px 20px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    background: none;
+    color: var(--text-dark); 
+    font-weight: 600;
+    text-align: left;
+    transition: all 0.3s ease;
+    border-left: 5px solid transparent;
+    margin: 5px 0;
+    box-sizing: border-box; 
+    white-space: nowrap; 
+}
+
+.sidebar button:hover:not(.active) {
+    background: var(--card-bg); 
+    border-left-color: var(--sidebar-accent-color); 
+}
+
+.sidebar button.active {
+    background: var(--sidebar-accent-color); 
+    color: var(--text-light); 
+    border-left-color: var(--accent-yellow);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar button i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0; 
+}
+
+/* ---------------------------------------------------
+   CONTENT AREA & CARDS
+--------------------------------------------------- */
+.content-area {
+    flex-grow: 1;
+    padding: 25px 30px;
+}
+
+.content {
+    padding: 0;
+}
+
+.dashboard-grid {
+    grid-template-columns: 1fr 1fr; 
+    gap: 25px; 
+    margin-bottom: 25px;
+    display: grid;
+}
+
+.card {
+    background: var(--card-bg); 
+    padding: 25px;
+    border-radius: 16px;
+    margin-bottom: 0; 
+    box-shadow: 0px 4px 20px var(--shadow-light);
+    border-left: 6px solid var(--primary-green); 
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%; 
+    box-sizing: border-box;
+}
+
+/* Style untuk label sensor */
+.card .label {
+    font-size: 16px;
+    color: #7f8c8d; 
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.card .label i {
+    font-size: 18px;
+    margin-right: 8px;
+    color: var(--primary-green);
+}
+
+/* Style untuk nilai real-time (Angka Besar) */
+.card .value {
+    font-size: 2.5em; 
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1.1;
+    text-align: right;
+    margin-top: auto; 
+}
+
+/* Style Khusus untuk Card */
+#cahaya .card, .content:not(#dashboard) .card:first-child { border-left-color: #3498db; }
+#nutrisi .card, .content:not(#dashboard) .card:first-child { border-left-color: #e74c3c; }
+
+/* Control Bar */
+.control-bar {
+    background: var(--card-bg); 
+    padding: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 15px var(--shadow-light);
+    margin-bottom: 25px;
+    align-items: center;
+}
+ 
+.control-btn {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.3s ease, transform 0.1s;
+}
+
+.pause { background: #e74c3c; }
+.pause:hover { background: #c0392b; }
+.reset { background: #3498db; }
+.reset:hover { background: #2980b9; }
+.export { background: #f39c12; }
+.export:hover { background: #e67e22; }
+
+.interval-label {
+    font-size: 14px;
+    color: var(--text-dark);
+    font-weight: 500;
+    margin-left: auto; 
+    display: flex;
+    align-items: center;
+}
+.interval-label select {
+    padding: 8px;
+    border-radius: 6px;
+    margin-left: 5px;
+    border: 1px solid #ccc;
+    background: var(--bg-light);
+    color: var(--text-dark);
+}
+
+/* STATUS BADGES */
+.status-ideal { 
+    background-color: #e8f9ed; 
+    color: #27ae60; 
+    padding: 4px 8px; 
+    border-radius: 6px; 
+    font-weight: 600; 
+}
+.status-warning { 
+    background-color: #fef3e3; 
+    color: #d35400; 
+    padding: 4px 8px; 
+    border-radius: 6px; 
+    font-weight: 600; 
+}
+.status-danger { 
+    background-color: #fde8e8; 
+    color: #c0392b; 
+    padding: 4px 8px; 
+    border-radius: 6-px; 
+    font-weight: 600; 
+}
+
+
+/* ---------------------------------------------------
+   MEDIA QUERIES (RESPONSIVE) - PENYESUAIAN MOBILE
+--------------------------------------------------- */
+@media (max-width: 992px) {
+    /* Penyesuaian Header pada Tablet */
+    header h1 { font-size: 18px; }
+    .subtitle { font-size: 12px; }
+    
+    /* Penyesuaian Lebar Sidebar pada Tablet/Layar Sedang */
+    :root { --sidebar-width: 150px; } 
+    .sidebar button { font-size: 14px; } /* Teks sidebar sedikit kecil */
+}
+
+@media (max-width: 768px) {
+    /* 1. Header di Mobile (Dibuat lebih ringkas) */
+    .header-content {
+        flex-direction: row; 
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .header-group {
+        margin-bottom: 0;
+        flex-grow: 1;
+        max-width: calc(100% - 120px); /* Batasi lebar agar ada ruang untuk toggle */
+    }
+    
+    .logo-um { width: 45px; margin-right: 10px; }
+    header h1 { font-size: 14px; }
+    .subtitle { display: none; } /* Subtitle dihilangkan di HP */
+    .toggle-dark { font-size: 12px; padding: 6px 10px; }
+
+    /* 2. PENYESUAIAN TAMPILAN PC DI HP (Sidebar tetap di kiri) */
+    
+    /* Lebar sidebar diperkecil lagi agar konten muat */
+    :root { --sidebar-width: 120px; } 
+
+    /* Sesuaikan padding dan margin agar tidak terlalu lebar */
+    .main-wrapper { 
+        min-height: calc(100vh - var(--header-height)); 
+        margin: 0; 
+    }
+
+    .sidebar {
+        padding: 10px 0;
+    }
+    
+    /* Tombol sidebar disesuaikan agar teks muat */
+    .sidebar button {
+        padding: 10px 8px; /* Padding lebih kecil */
+        font-size: 12px; /* Teks lebih kecil */
+        text-align: center;
+        flex-direction: column; /* Ikon di atas teks */
+        line-height: 1.2;
+    }
+    
+    .sidebar button i {
+        margin-right: 0;
+        margin-bottom: 4px; /* Jarak antara ikon dan teks */
+        font-size: 16px;
+    }
+    
+    .content-area {
+        padding: 15px; /* Padding konten lebih kecil */
+    }
+    
+    /* Dashboard grid diubah menjadi 1 kolom */
+    .dashboard-grid {
+        grid-template-columns: 1fr; 
+        gap: 15px;
+    }
+    
+    /* Nilai real-time pada card */
+    .card .value {
+        font-size: 2em;
+    }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <div class="header-group">
+            <img src="Lambang-UM.png" 
+                 alt="Logo Universitas Negeri Malang" 
+                 class="logo-um">
+            
+            <div class="title-container">
+                <h1>MONITORING PERTANIAN HIDROPONIK SAWI SKALA KECIL</h1>
+                <p class="subtitle">Oleh Kelompok 5</p>
+            </div>
+        </div>
+        
+        <div class="toggle-dark" onclick="toggleDarkMode()" id="darkModeToggle">
+            <i class="fas fa-moon"></i> Dark Mode
+        </div>
+    </div>
+</header>
+
+<div class="main-wrapper">
+    
+    <nav class="sidebar">
+        <button class="tablinks active" onclick="openTab(event, 'dashboard')"><i class="fas fa-chart-line"></i> <span>Dashboard</span></button>
+        <button class="tablinks" onclick="openTab(event, 'cahaya')"><i class="fas fa-sun"></i> <span>Cahaya</span></button>
+        <button class="tablinks" onclick="openTab(event, 'nutrisi')"><i class="fas fa-tint"></i> <span>Nutrisi</span></button>
+    </nav>
+
+    <div class="content-area">
+        
+        <div id="dashboard" class="content" style="display:block;">
+
+            <div class="control-bar">
+                <button class="control-btn pause" id="pauseBtn" onclick="togglePause()"><i class="fas fa-pause"></i> Pause Live</button>
+                <button class="control-btn reset" onclick="resetCharts()"><i class="fas fa-redo"></i> Reset Data</button>
+                <button class="control-btn export" onclick="downloadExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                <label for="intervalSel" class="interval-label">Update interval: 
+                    <select id="intervalSel" onchange="updateIntervalFromSelect()">
+                      <option value="5000">5s</option>
+                      <option value="2000">2s</option>
+                      <option value="1000" selected>1s</option>
+                      <option value="500">0.5s</option>
+                    </select>
+                </label>
+            </div>
+            
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="label"><i class="fas fa-sun"></i> Intensitas Cahaya</div>
+                    <div class="value" id="ldrDashboard">0 lux</div>
+                </div>
+
+                <div class="card">
+                    <div class="label"><i class="fas fa-flask"></i> Konsentrasi Larutan</div>
+                    <div class="value" id="tdsDashboard">0 ppm</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <canvas id="mixedChart"></canvas>
+            </div>
+        </div>
+
+        <div id="cahaya" class="content">
+            <div class="card" style="margin-bottom: 25px;">
+                <div class="label"><i class="fas fa-lightbulb"></i> Nilai LDR Real-time</div>
+                <div class="value" id="ldrValue">0 lux</div>
+                <p id="ldrStatus" style="margin-top: 15px;">Status: -</p>
+            </div>
+
+            <div class="card">
+                <canvas id="ldrChart"></canvas>
+            </div>
+        </div>
+
+        <div id="nutrisi" class="content">
+            <div class="card" style="margin-bottom: 25px;">
+                <div class="label"><i class="fas fa-water"></i> Nilai TDS Real-time</div>
+                <div class="value" id="tdsValue">0 ppm</div>
+                <p id="tdsStatus" style="margin-top: 15px;">Status: -</p>
+            </div>
+
+            <div class="card">
+                <canvas id="tdsChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+</div> 
+
+<script>
+/* ================= DARK MODE FUNCTIONALITY ================= */
+function toggleDarkMode() {
+    const body = document.body;
+    const toggleButton = document.getElementById('darkModeToggle');
+    body.classList.toggle('dark-mode');
+    
+    const isDarkMode = body.classList.contains('dark-mode');
+    localStorage.setItem('dark-mode', isDarkMode);
+
+    if (isDarkMode) {
+        toggleButton.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+    } else {
+        toggleButton.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+    }
+    // Update chart colors when mode is toggled
+    updateChartTheme();
+}
+
+function loadDarkModePreference() {
+    const savedMode = localStorage.getItem('dark-mode');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const toggleButton = document.getElementById('darkModeToggle');
+
+    if (savedMode === 'true' || (savedMode === null && prefersDark)) {
+        document.body.classList.add('dark-mode');
+        toggleButton.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+    } else {
+        toggleButton.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+    }
+    // Initial chart theme update
+    updateChartTheme();
+}
+
+function updateChartTheme() {
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const textColor = getComputedStyle(document.body).getPropertyValue('--text-dark');
+    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+
+    [ldrChart, tdsChart, mixedChart].forEach(chart => {
+        chart.options.scales.x.grid.color = gridColor;
+        chart.options.scales.x.ticks.color = textColor;
+        
+        // Update Y axes for general charts
+        if (chart === ldrChart || chart === tdsChart) {
+             chart.options.scales.y.grid.color = gridColor;
+             chart.options.scales.y.ticks.color = textColor;
+             chart.options.scales.y.title.color = textColor;
+        }
+
+        // Update Y axes for mixed chart
+        if (chart === mixedChart) {
+            chart.options.scales.yLDR.grid.color = gridColor;
+            chart.options.scales.yLDR.ticks.color = textColor;
+            chart.options.scales.yLDR.title.color = textColor;
+            
+            chart.options.scales.yTDS.ticks.color = textColor;
+            chart.options.scales.yTDS.title.color = textColor;
+
+            // Update legend color
+            chart.options.plugins.legend.labels.color = textColor;
+            chart.options.plugins.title.color = textColor;
+        }
+        chart.update();
+    });
+}
+
+
+/* ================= TAB / SIDEBAR FUNCTION ================= */
+function openTab(evt, tabName) {
+    let i, content, tablinks;
+
+    content = document.getElementsByClassName("content");
+    for (i = 0; i < content.length; i++) content[i].style.display = "none";
+
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++)
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+
+/* ================= CHART SETUP ================= */
+// Options dasar untuk semua chart
+const baseChartOptions = { 
+    responsive: true, 
+    maintainAspectRatio: false, 
+    borderWidth: 2, 
+    tension: 0.4, 
+    plugins: {
+        legend: { display: false },
+        title: { display: false }
+    },
+    scales: {
+        x: {
+            title: { display: true, text: 'Waktu' },
+            ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 6 },
+            grid: { drawOnChartArea: true }
+        },
+        y: { 
+            beginAtZero: true,
+            title: { display: true, text: '' }, 
+            grid: { drawOnChartArea: true }
+        }
+    }
+};
+
+const ldrCtx = document.getElementById('ldrChart').getContext('2d');
+const ldrChart = new Chart(ldrCtx, {
+    type: 'line',
+    data: { 
+        labels: [], 
+        datasets: [{ 
+            label: 'LDR (lux)', 
+            data: [], 
+            borderColor: '#3498db', 
+            backgroundColor: 'rgba(52, 152, 219, 0.2)',
+            fill: true
+        }] 
+    },
+    options: JSON.parse(JSON.stringify(baseChartOptions)) 
+});
+ldrChart.options.scales.y.title.text = 'LDR (lux)';
+
+
+const tdsCtx = document.getElementById('tdsChart').getContext('2d');
+const tdsChart = new Chart(tdsCtx, {
+    type: 'line',
+    data: { 
+        labels: [], 
+        datasets: [{ 
+            label: 'TDS (ppm)', 
+            data: [], 
+            borderColor: '#e74c3c', 
+            backgroundColor: 'rgba(231, 76, 60, 0.2)',
+            fill: true
+        }] 
+    },
+    options: JSON.parse(JSON.stringify(baseChartOptions))
+});
+tdsChart.options.scales.y.title.text = 'TDS (ppm)';
+
+
+// Chart Gabungan (Mixed Chart)
+const mixedCtx = document.getElementById('mixedChart').getContext('2d');
+const mixedChart = new Chart(mixedCtx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [
+            {
+                label: 'Intensitas Cahaya (lux)',
+                data: [],
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                yAxisID: 'yLDR',
+                tension: 0.4,
+                pointRadius: 2,
+                fill: false,
+            },
+            {
+                label: 'Konsentrasi Larutan (ppm)',
+                data: [],
+                borderColor: '#e74c3c',
+                backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                yAxisID: 'yTDS',
+                tension: 0.4,
+                pointRadius: 2,
+                fill: false,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: { usePointStyle: true, color: 'var(--text-dark)' }
+            },
+            title: {
+                display: true,
+                text: 'Grafik Gabungan Data Sensor',
+                color: 'var(--text-dark)'
+            }
+        },
+        scales: {
+            x: {
+                title: { display: true, text: 'Waktu' },
+                ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 6 },
+            },
+            yLDR: {
+                type: 'linear',
+                position: 'left',
+                title: { display: true, text: 'LDR (lux)' },
+                beginAtZero: true,
+                grid: { drawOnChartArea: true }
+            },
+            yTDS: {
+                type: 'linear',
+                position: 'right',
+                title: { display: true, text: 'TDS (ppm)' },
+                beginAtZero: true,
+                grid: { drawOnChartArea: false } 
+            }
+        }
+    }
+});
+
+
+/* =============== FETCH DATA / CONTROL SYSTEM =============== */
+
+const ESP32_URL = "http://192.168.4.1/data";
+let isPaused = false;
+let interval = 1000;
+let timer = null; 
+let excelData = [];
+const MAX_CHART_POINTS = 15;
+const MAX_EXCEL_POINTS = 1000; 
+
+// Fungsi Simulasi Data
+function simulateData() {
+    let randomLdr = Math.floor(Math.random() * (1000 - 300 + 1)) + 300;
+    let randomTds = Math.floor(Math.random() * (1200 - 500 + 1)) + 500;
+    return { ldr: randomLdr, tds: randomTds };
+}
+
+async function getSensorData() {
+    if (isPaused) return;
+
+    let ldr, tds;
+    
+    // Data Simulasi (Ganti dengan Fetch jika sudah terhubung ke ESP32)
+    let data = simulateData(); 
+    ldr = data.ldr;
+    tds = data.tds;
+    
+    /*
+    // UN-COMMENT kode ini jika menggunakan ESP32/NodeMCU:
+    try {
+        const response = await fetch(ESP32_URL);
+        const data = await response.json();
+        ldr = data.ldr; // Sesuaikan nama variabel JSON
+        tds = data.tds; // Sesuaikan nama variabel JSON
+    } catch (error) {
+        console.error("Gagal mengambil data dari ESP32:", error);
+        let data = simulateData(); 
+        ldr = data.ldr;
+        tds = data.tds;
+    }
+    */
+    
+    updateUI(ldr, tds);
+    updateCharts(ldr, tds);
+    updateMixedChart(ldr, tds);
+}
+
+function togglePause() {
+    isPaused = !isPaused;
+    const pauseBtn = document.getElementById("pauseBtn");
+    if (isPaused) {
+        pauseBtn.innerHTML = '<i class="fas fa-play"></i> Resume Live';
+        pauseBtn.style.backgroundColor = '#16a085'; 
+    } else {
+        pauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pause Live';
+        pauseBtn.style.backgroundColor = '#e74c3c'; 
+    }
+}
+
+function resetCharts() {
+    [ldrChart, tdsChart, mixedChart].forEach(chart => {
+        chart.data.labels = [];
+        chart.data.datasets.forEach(dataset => dataset.data = []);
+        chart.update();
+    });
+
+    excelData = [];
+    alert("Data berhasil direset!");
+}
+
+function updateIntervalFromSelect() {
+    const newInterval = parseInt(document.getElementById("intervalSel").value);
+    if (newInterval !== interval) {
+        interval = newInterval;
+        clearInterval(timer);
+        timer = setInterval(getSensorData, interval);
+        console.log("Interval diperbarui menjadi " + interval + " ms");
+    }
+}
+
+function downloadExcel() {
+    let csv = "Waktu,LDR (lux),TDS (ppm)\n";
+    excelData.forEach(row => {
+        csv += `${row.time},${row.ldr},${row.tds}\n`;
+    });
+
+    let blob = new Blob([csv], { type: "text/csv" });
+    let url = URL.createObjectURL(blob);
+
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = "data_hidroponik_sawi.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+/* ================= UPDATE UI ================= */
+function updateUI(ldr, tds) {
+    let time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
+    // Batasi data excel
+    excelData.push({ time, ldr, tds });
+    if (excelData.length > MAX_EXCEL_POINTS) {
+        excelData.shift(); 
+    }
+
+    document.getElementById("ldrDashboard").innerText = ldr + " lux";
+    document.getElementById("tdsDashboard").innerText = tds + " ppm";
+    document.getElementById("ldrValue").innerText = ldr + " lux";
+    document.getElementById("tdsValue").innerText = tds + " ppm";
+
+    // LDR Status (Sawi Ideal: 600 - 900 lux)
+    const ldrStatusEl = document.getElementById("ldrStatus");
+    ldrStatusEl.className = '';
+    
+    if (ldr < 400) { 
+        ldrStatusEl.innerText = "Status: Gelap, Perlu Cahaya Tambahan!";
+        ldrStatusEl.classList.add('status-danger');
+    }
+    else if (ldr < 600) { 
+        ldrStatusEl.innerText = "Status: Cukup, Tingkatkan sedikit";
+        ldrStatusEl.classList.add('status-warning');
+    }
+    else if (ldr <= 900) { 
+        ldrStatusEl.innerText = "Status: IDEAL untuk Pertumbuhan Sawi!";
+        ldrStatusEl.classList.add('status-ideal');
+    }
+    else { 
+        ldrStatusEl.innerText = "Status: Terlalu Terang!";
+        ldrStatusEl.classList.add('status-danger');
+    }
+
+    // TDS Status (Sawi Ideal: 600 - 1000 ppm)
+    const tdsStatusEl = document.getElementById("tdsStatus");
+    tdsStatusEl.className = '';
+    
+    if (tds < 600) {
+        tdsStatusEl.innerText = "Status: Nutrisi Kurang, Perlu Ditambah!";
+        tdsStatusEl.classList.add('status-danger');
+    }
+    else if (tds <= 1000) {
+        tdsStatusEl.innerText = "Status: IDEAL untuk Sawi!";
+        tdsStatusEl.classList.add('status-ideal');
+    }
+    else {
+        tdsStatusEl.innerText = "Status: Terlalu Pekat, Tambahkan Air!";
+        tdsStatusEl.classList.add('status-danger');
+    }
+}
+
+/* ================= UPDATE CHART ================= */
+function updateCharts(ldr, tds) {
+    const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
+    // LDR CHART
+    if (ldrChart.data.labels.length >= MAX_CHART_POINTS) {
+        ldrChart.data.labels.shift();
+        ldrChart.data.datasets[0].data.shift();
+    }
+    ldrChart.data.labels.push(time);
+    ldrChart.data.datasets[0].data.push(ldr);
+    ldrChart.update('none'); 
+
+    // TDS CHART
+    if (tdsChart.data.labels.length >= MAX_CHART_POINTS) {
+        tdsChart.data.labels.shift();
+        tdsChart.data.datasets[0].data.shift();
+    }
+    tdsChart.data.labels.push(time);
+    tdsChart.data.datasets[0].data.push(tds);
+    tdsChart.update('none');
+}
+
+function updateMixedChart(ldr, tds) {
+    const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
+    if (mixedChart.data.labels.length >= MAX_CHART_POINTS) {
+        mixedChart.data.labels.shift();
+        mixedChart.data.datasets[0].data.shift();
+        mixedChart.data.datasets[1].data.shift();
+    }
+    mixedChart.data.labels.push(time);
+    mixedChart.data.datasets[0].data.push(ldr);
+    mixedChart.data.datasets[1].data.push(tds);
+    mixedChart.update('none');
+}
+
+// Inisialisasi: Buka tab dashboard, atur interval, dan load dark mode
+document.addEventListener('DOMContentLoaded', () => {
+    loadDarkModePreference(); 
+    
+    // Atur interval awal
+    document.getElementById('intervalSel').value = '1000';
+    interval = 1000;
+    timer = setInterval(getSensorData, interval);
+
+    // Buka tab dashboard
+    const defaultTabButton = document.querySelector('.sidebar button.active');
+    if (defaultTabButton) {
+        openTab({ currentTarget: defaultTabButton }, 'dashboard');
+    }
+});
+</script>
+</body>
+</html>

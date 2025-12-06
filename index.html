@@ -19,23 +19,20 @@
     --primary-green-dark: #0e7a63;
     --accent-yellow: #f1c40f; /* Kuning Aksen */
     
-    /* Perubahan warna Aksen Sidebar */
-    --sidebar-accent-color: #4a69bd; /* Biru Gelap/Ungu - Non Hijau/Putih */
-    --sidebar-accent-hover: #e0e6f6; /* Latar belakang hover lebih terang */
+    --sidebar-accent-color: #4a69bd; 
+    --sidebar-accent-hover: #e0e6f6; 
 
     --bg-light: #f4f9f4; /* Background Halaman */
     --card-bg: #ffffff; /* Background Card */
     
-    /* **Warna Background Sidebar: Pale Green (Non-putih)** */
-    --sidebar-bg: #eaf6e8; 
+    --sidebar-bg: #eaf6e8; /* Pale Green */
 
-    --text-dark: #222; /* Teks Utama */
-    --text-light: #fdfdfd; /* Teks Pada Header */
+    --text-dark: #222; 
+    --text-light: #fdfdfd; 
 
     --shadow-light: rgba(0, 0, 0, 0.1);
     --shadow-medium: rgba(0, 0, 0, 0.15);
     
-    /* **Lebar Sidebar Default (PC):** */
     --sidebar-width: 180px; 
     --header-height: 84px;
 }
@@ -46,14 +43,12 @@
 .dark-mode {
     --bg-light: #121212;
     --card-bg: #1e1e1e;
-    --sidebar-bg: #1a1a1a; /* Darker background for sidebar in dark mode */
+    --sidebar-bg: #1a1a1a; 
     --text-dark: #e8e8e8;
     --shadow-light: rgba(255, 255, 255, 0.08);
     --shadow-medium: rgba(255, 255, 255, 0.12);
-    /* Penyesuaian Dark Mode untuk Sidebar */
     --sidebar-accent-hover: #33395c; 
 }
-/* Menyesuaikan Status Badges di Dark Mode */
 .dark-mode .status-ideal { background-color: #1e6d42 !important; color: #a3e7a3 !important; }
 .dark-mode .status-warning { background-color: #634305 !important; color: #f9d77f !important; }
 .dark-mode .status-danger { background-color: #7a2018 !important; color: #ff9999 !important; }
@@ -115,7 +110,6 @@ header::before {
     flex-grow: 1; 
 }
 
-/* PENTING: Perbaikan Ukuran Logo */
 .logo-um { 
     width: 80px; 
     height: auto; 
@@ -172,7 +166,7 @@ header h1 {
 }
 
 /* ---------------------------------------------------
-   SIDEBAR (Menu Navigasi Vertical)
+   SIDEBAR (Menu Navigasi Vertical - PC/Desktop)
 --------------------------------------------------- */
 .sidebar {
     width: var(--sidebar-width);
@@ -233,10 +227,6 @@ header h1 {
     padding: 25px 30px;
 }
 
-.content {
-    padding: 0;
-}
-
 .dashboard-grid {
     grid-template-columns: 1fr 1fr; 
     gap: 25px; 
@@ -248,10 +238,8 @@ header h1 {
     background: var(--card-bg); 
     padding: 25px;
     border-radius: 16px;
-    margin-bottom: 0; 
     box-shadow: 0px 4px 20px var(--shadow-light);
     border-left: 6px solid var(--primary-green); 
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -259,7 +247,6 @@ header h1 {
     box-sizing: border-box;
 }
 
-/* Style untuk label sensor */
 .card .label {
     font-size: 16px;
     color: #7f8c8d; 
@@ -275,7 +262,6 @@ header h1 {
     color: var(--primary-green);
 }
 
-/* Style untuk nilai real-time (Angka Besar) */
 .card .value {
     font-size: 2.5em; 
     font-weight: 700;
@@ -285,7 +271,6 @@ header h1 {
     margin-top: auto; 
 }
 
-/* Style Khusus untuk Card */
 #cahaya .card, .content:not(#dashboard) .card:first-child { border-left-color: #3498db; }
 #nutrisi .card, .content:not(#dashboard) .card:first-child { border-left-color: #e74c3c; }
 
@@ -361,78 +346,114 @@ header h1 {
 
 
 /* ---------------------------------------------------
-   MEDIA QUERIES (RESPONSIVE) - PENYESUAIAN MOBILE
+   MEDIA QUERIES (RESPONSIVE)
 --------------------------------------------------- */
 @media (max-width: 992px) {
-    /* Penyesuaian Header pada Tablet */
     header h1 { font-size: 18px; }
     .subtitle { font-size: 12px; }
     
-    /* Penyesuaian Lebar Sidebar pada Tablet/Layar Sedang */
     :root { --sidebar-width: 150px; } 
-    .sidebar button { font-size: 14px; } /* Teks sidebar sedikit kecil */
+    .sidebar button { font-size: 14px; } 
 }
 
 @media (max-width: 768px) {
-    /* 1. Header di Mobile (Dibuat lebih ringkas) */
+    /* 1. STRUKTUR UTAMA DI HP: Tumpukan Vertikal */
+    .main-wrapper {
+        flex-direction: column; 
+        min-height: auto;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr; /* 1 kolom di HP */
+        gap: 15px;
+    }
+
+    /* 2. HEADER DI HP: Dibuat Ringkas dan Rapi */
+    header { height: auto; padding: 12px 15px; } 
+    
     .header-content {
         flex-direction: row; 
         align-items: center;
-        justify-content: space-between;
     }
     
     .header-group {
         margin-bottom: 0;
         flex-grow: 1;
-        max-width: calc(100% - 120px); /* Batasi lebar agar ada ruang untuk toggle */
+        max-width: calc(100% - 120px); 
     }
     
-    .logo-um { width: 45px; margin-right: 10px; }
-    header h1 { font-size: 14px; }
-    .subtitle { display: none; } /* Subtitle dihilangkan di HP */
-    .toggle-dark { font-size: 12px; padding: 6px 10px; }
-
-    /* 2. PENYESUAIAN TAMPILAN PC DI HP (Sidebar tetap di kiri) */
+    .logo-um { 
+        width: 40px; 
+        margin-right: 8px;
+    }
     
-    /* Lebar sidebar diperkecil lagi agar konten muat */
-    :root { --sidebar-width: 120px; } 
-
-    /* Sesuaikan padding dan margin agar tidak terlalu lebar */
-    .main-wrapper { 
-        min-height: calc(100vh - var(--header-height)); 
-        margin: 0; 
+    header h1 { 
+        font-size: 14px; 
+        white-space: normal; 
+        line-height: 1.3;
+    }
+    
+    .subtitle { 
+        display: none; 
+    }
+    
+    .toggle-dark { 
+        font-size: 12px; 
+        padding: 6px 10px;
+        margin-left: 10px;
     }
 
+    /* 3. SIDEBAR DI HP: Diubah Menjadi Horizontal (Tabs) */
     .sidebar {
-        padding: 10px 0;
+        width: 100%; 
+        display: flex; 
+        padding: 5px 10px;
+        box-shadow: 0px 4px 12px var(--shadow-light);
+        position: static; 
+        height: auto; 
+        overflow-x: auto; 
+        justify-content: space-around;
+        background: var(--card-bg); 
+        border-bottom: 3px solid var(--sidebar-accent-color);
+    }
+
+    .sidebar button {
+        white-space: nowrap; 
+        flex-grow: 1; 
+        min-width: 30%; 
+        text-align: center;
+        border-left: none;
+        border-bottom: 3px solid transparent; 
+        border-radius: 0;
+        margin: 0; 
+        flex-direction: row; 
+        justify-content: center;
+        padding: 10px 5px;
+        font-size: 14px;
+        font-weight: 500;
     }
     
-    /* Tombol sidebar disesuaikan agar teks muat */
-    .sidebar button {
-        padding: 10px 8px; /* Padding lebih kecil */
-        font-size: 12px; /* Teks lebih kecil */
-        text-align: center;
-        flex-direction: column; /* Ikon di atas teks */
-        line-height: 1.2;
+    .sidebar button:hover:not(.active) {
+        background: var(--bg-light); 
+        border-bottom-color: var(--primary-green);
+    }
+
+    .sidebar button.active {
+        background: var(--sidebar-accent-color);
+        color: var(--text-light); 
+        border-bottom-color: var(--accent-yellow);
+        box-shadow: none;
     }
     
     .sidebar button i {
-        margin-right: 0;
-        margin-bottom: 4px; /* Jarak antara ikon dan teks */
-        font-size: 16px;
+        margin-right: 5px;
+        width: 15px; 
     }
     
     .content-area {
-        padding: 15px; /* Padding konten lebih kecil */
+        padding: 15px; 
     }
     
-    /* Dashboard grid diubah menjadi 1 kolom */
-    .dashboard-grid {
-        grid-template-columns: 1fr; 
-        gap: 15px;
-    }
-    
-    /* Nilai real-time pada card */
     .card .value {
         font-size: 2em;
     }
@@ -463,9 +484,9 @@ header h1 {
 <div class="main-wrapper">
     
     <nav class="sidebar">
-        <button class="tablinks active" onclick="openTab(event, 'dashboard')"><i class="fas fa-chart-line"></i> <span>Dashboard</span></button>
-        <button class="tablinks" onclick="openTab(event, 'cahaya')"><i class="fas fa-sun"></i> <span>Cahaya</span></button>
-        <button class="tablinks" onclick="openTab(event, 'nutrisi')"><i class="fas fa-tint"></i> <span>Nutrisi</span></button>
+        <button class="tablinks active" onclick="openTab(event, 'dashboard')"><i class="fas fa-chart-line"></i> Dashboard</button>
+        <button class="tablinks" onclick="openTab(event, 'cahaya')"><i class="fas fa-sun"></i> Cahaya</button>
+        <button class="tablinks" onclick="openTab(event, 'nutrisi')"><i class="fas fa-tint"></i> Nutrisi</button>
     </nav>
 
     <div class="content-area">
@@ -545,7 +566,6 @@ function toggleDarkMode() {
     } else {
         toggleButton.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
     }
-    // Update chart colors when mode is toggled
     updateChartTheme();
 }
 
@@ -560,7 +580,6 @@ function loadDarkModePreference() {
     } else {
         toggleButton.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
     }
-    // Initial chart theme update
     updateChartTheme();
 }
 
@@ -573,14 +592,12 @@ function updateChartTheme() {
         chart.options.scales.x.grid.color = gridColor;
         chart.options.scales.x.ticks.color = textColor;
         
-        // Update Y axes for general charts
         if (chart === ldrChart || chart === tdsChart) {
              chart.options.scales.y.grid.color = gridColor;
              chart.options.scales.y.ticks.color = textColor;
              chart.options.scales.y.title.color = textColor;
         }
 
-        // Update Y axes for mixed chart
         if (chart === mixedChart) {
             chart.options.scales.yLDR.grid.color = gridColor;
             chart.options.scales.yLDR.ticks.color = textColor;
@@ -589,7 +606,6 @@ function updateChartTheme() {
             chart.options.scales.yTDS.ticks.color = textColor;
             chart.options.scales.yTDS.title.color = textColor;
 
-            // Update legend color
             chart.options.plugins.legend.labels.color = textColor;
             chart.options.plugins.title.color = textColor;
         }
@@ -614,7 +630,6 @@ function openTab(evt, tabName) {
 }
 
 /* ================= CHART SETUP ================= */
-// Options dasar untuk semua chart
 const baseChartOptions = { 
     responsive: true, 
     maintainAspectRatio: false, 
@@ -674,7 +689,6 @@ const tdsChart = new Chart(tdsCtx, {
 tdsChart.options.scales.y.title.text = 'TDS (ppm)';
 
 
-// Chart Gabungan (Mixed Chart)
 const mixedCtx = document.getElementById('mixedChart').getContext('2d');
 const mixedChart = new Chart(mixedCtx, {
     type: 'line',
@@ -752,7 +766,6 @@ let excelData = [];
 const MAX_CHART_POINTS = 15;
 const MAX_EXCEL_POINTS = 1000; 
 
-// Fungsi Simulasi Data
 function simulateData() {
     let randomLdr = Math.floor(Math.random() * (1000 - 300 + 1)) + 300;
     let randomTds = Math.floor(Math.random() * (1200 - 500 + 1)) + 500;
@@ -764,18 +777,16 @@ async function getSensorData() {
 
     let ldr, tds;
     
-    // Data Simulasi (Ganti dengan Fetch jika sudah terhubung ke ESP32)
     let data = simulateData(); 
     ldr = data.ldr;
     tds = data.tds;
     
-    /*
-    // UN-COMMENT kode ini jika menggunakan ESP32/NodeMCU:
+    /* UN-COMMENT jika menggunakan ESP32/NodeMCU:
     try {
         const response = await fetch(ESP32_URL);
         const data = await response.json();
-        ldr = data.ldr; // Sesuaikan nama variabel JSON
-        tds = data.tds; // Sesuaikan nama variabel JSON
+        ldr = data.ldr; 
+        tds = data.tds; 
     } catch (error) {
         console.error("Gagal mengambil data dari ESP32:", error);
         let data = simulateData(); 
@@ -843,7 +854,6 @@ function downloadExcel() {
 function updateUI(ldr, tds) {
     let time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     
-    // Batasi data excel
     excelData.push({ time, ldr, tds });
     if (excelData.length > MAX_EXCEL_POINTS) {
         excelData.shift(); 
@@ -930,16 +940,13 @@ function updateMixedChart(ldr, tds) {
     mixedChart.update('none');
 }
 
-// Inisialisasi: Buka tab dashboard, atur interval, dan load dark mode
 document.addEventListener('DOMContentLoaded', () => {
     loadDarkModePreference(); 
     
-    // Atur interval awal
     document.getElementById('intervalSel').value = '1000';
     interval = 1000;
     timer = setInterval(getSensorData, interval);
 
-    // Buka tab dashboard
     const defaultTabButton = document.querySelector('.sidebar button.active');
     if (defaultTabButton) {
         openTab({ currentTarget: defaultTabButton }, 'dashboard');

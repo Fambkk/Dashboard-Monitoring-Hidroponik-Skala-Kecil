@@ -357,40 +357,33 @@ header h1 {
 }
 
 @media (max-width: 768px) {
-    /* 1. STRUKTUR UTAMA DI HP: Tumpukan Vertikal */
+    /* 1. STRUKTUR UTAMA DI HP: Sidebar Vertikal Compact */
     .main-wrapper {
-        flex-direction: column; 
-        min-height: auto;
+        flex-direction: row; 
+        min-height: calc(100vh - var(--header-height)); 
     }
     
     .dashboard-grid {
-        grid-template-columns: 1fr; /* 1 kolom di HP */
+        grid-template-columns: 1fr; 
         gap: 15px;
     }
 
-    /* 2. HEADER DI HP: Dibuat Ringkas dan Rapi */
-    header { height: auto; padding: 12px 15px; } 
-    
-    .header-content {
-        flex-direction: row; 
-        align-items: center;
-    }
+    /* 2. HEADER DI HP: Dibuat Sangat Ringkas */
+    header { height: auto; padding: 10px 15px; } 
     
     .header-group {
-        margin-bottom: 0;
-        flex-grow: 1;
-        max-width: calc(100% - 120px); 
+        max-width: calc(100% - 100px); 
     }
     
     .logo-um { 
-        width: 40px; 
-        margin-right: 8px;
+        width: 35px; /* Lebih kecil */
+        margin-right: 5px;
     }
     
     header h1 { 
-        font-size: 14px; 
-        white-space: normal; 
-        line-height: 1.3;
+        font-size: 12px; /* SANGAT KECIL */
+        white-space: normal; /* Judul dibiarkan wrap agar tidak terpotong */
+        line-height: 1.2;
     }
     
     .subtitle { 
@@ -398,64 +391,72 @@ header h1 {
     }
     
     .toggle-dark { 
-        font-size: 12px; 
-        padding: 6px 10px;
-        margin-left: 10px;
+        font-size: 10px; 
+        padding: 5px 8px;
+        margin-left: 5px;
     }
 
-    /* 3. SIDEBAR DI HP: Diubah Menjadi Horizontal (Tabs) */
+    /* 3. SIDEBAR DI HP: Vertical Compact (Lebar 90px) */
+    :root { --sidebar-width: 90px; } /* Lebar diperkecil maksimal */
+    
     .sidebar {
-        width: 100%; 
-        display: flex; 
-        padding: 5px 10px;
-        box-shadow: 0px 4px 12px var(--shadow-light);
-        position: static; 
-        height: auto; 
-        overflow-x: auto; 
-        justify-content: space-around;
-        background: var(--card-bg); 
-        border-bottom: 3px solid var(--sidebar-accent-color);
+        width: var(--sidebar-width); 
+        padding: 10px 0;
+        box-shadow: 4px 0 12px var(--shadow-light);
+        position: sticky; 
+        height: calc(100vh - var(--header-height));
+        display: block; 
+        overflow-x: hidden; 
+        background: var(--sidebar-bg); 
+        border-bottom: none;
     }
 
     .sidebar button {
-        white-space: nowrap; 
-        flex-grow: 1; 
-        min-width: 30%; 
+        padding: 10px 5px; /* Padding kecil */
+        font-size: 10px; /* Teks sangat kecil */
         text-align: center;
-        border-left: none;
-        border-bottom: 3px solid transparent; 
-        border-radius: 0;
-        margin: 0; 
-        flex-direction: row; 
-        justify-content: center;
-        padding: 10px 5px;
-        font-size: 14px;
-        font-weight: 500;
-    }
-    
-    .sidebar button:hover:not(.active) {
-        background: var(--bg-light); 
-        border-bottom-color: var(--primary-green);
-    }
-
-    .sidebar button.active {
-        background: var(--sidebar-accent-color);
-        color: var(--text-light); 
-        border-bottom-color: var(--accent-yellow);
-        box-shadow: none;
+        flex-direction: column; /* Ikon di atas teks */
+        line-height: 1.1;
+        border-left: 3px solid transparent; 
+        margin: 3px 0;
+        min-width: auto;
     }
     
     .sidebar button i {
-        margin-right: 5px;
-        width: 15px; 
+        margin-right: 0;
+        margin-bottom: 3px; 
+        font-size: 14px;
+        width: auto;
+    }
+
+    .sidebar button.active {
+        border-left-color: var(--accent-yellow);
+        border-bottom-color: transparent;
     }
     
     .content-area {
-        padding: 15px; 
+        padding: 10px; /* Padding konten lebih kecil */
+        width: calc(100% - var(--sidebar-width)); /* Memastikan konten mengisi sisa ruang */
+    }
+    
+    /* Perbaikan tata letak tombol kontrol */
+    .control-bar {
+        justify-content: space-between;
+    }
+    .control-btn {
+        flex-grow: 1; 
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+    .interval-label {
+        margin-left: 0;
+        width: 100%; /* Memastikan ini berada di baris baru */
+        justify-content: flex-end;
+        margin-top: 5px;
     }
     
     .card .value {
-        font-size: 2em;
+        font-size: 1.8em; 
     }
 }
 </style>

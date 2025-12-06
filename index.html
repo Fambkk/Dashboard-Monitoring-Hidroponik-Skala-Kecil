@@ -52,6 +52,12 @@
 .dark-mode .status-ideal { background-color: #1e6d42 !important; color: #a3e7a3 !important; }
 .dark-mode .status-warning { background-color: #634305 !important; color: #f9d77f !important; }
 .dark-mode .status-danger { background-color: #7a2018 !important; color: #ff9999 !important; }
+.dark-mode #about-us .project-description {
+    background: #252525;
+    border: 1px solid #333;
+}
+.dark-mode .member-name { color: var(--primary-green); }
+
 
 /* ---------------------------------------------------
    BODY dan STRUKTUR UMUM
@@ -344,6 +350,87 @@ header h1 {
     font-weight: 600; 
 }
 
+/* ---------------------------------------------------
+   TENTANG KAMI
+--------------------------------------------------- */
+#about-us {
+    padding: 30px;
+    border-left: 6px solid var(--sidebar-accent-color);
+}
+
+#about-us h2 {
+    color: var(--primary-green-dark);
+    font-size: 28px;
+    border-bottom: 2px solid var(--sidebar-accent-color);
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+#about-us .project-description {
+    background: var(--sidebar-bg);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    line-height: 1.6;
+    font-weight: 500;
+    border: 1px solid #ddd;
+}
+
+/* Penambahan CSS untuk Grid Anggota */
+.member-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.member-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px var(--shadow-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-top: 5px solid var(--accent-yellow);
+}
+
+.member-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px var(--shadow-medium);
+}
+
+.profile-img-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--sidebar-accent-color);
+    color: var(--text-light);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3em;
+    margin-bottom: 15px;
+    border: 3px solid var(--card-bg); /* Border untuk Dark Mode */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.member-name {
+    font-size: 1.2em;
+    font-weight: 700;
+    margin: 5px 0 0;
+    color: var(--primary-green-dark);
+}
+
+.member-nim {
+    font-size: 0.9em;
+    color: #7f8c8d;
+    margin-top: 2px;
+    font-weight: 500;
+}
+
 
 /* ---------------------------------------------------
    MEDIA QUERIES (RESPONSIVE)
@@ -367,7 +454,7 @@ header h1 {
         grid-template-columns: 1fr; 
         gap: 15px;
     }
-
+    
     /* 2. HEADER DI HP: Dibuat Sangat Ringkas */
     header { height: auto; padding: 10px 15px; } 
     
@@ -376,13 +463,13 @@ header h1 {
     }
     
     .logo-um { 
-        width: 35px; /* Lebih kecil */
+        width: 35px; 
         margin-right: 5px;
     }
     
     header h1 { 
-        font-size: 12px; /* SANGAT KECIL */
-        white-space: normal; /* Judul dibiarkan wrap agar tidak terpotong */
+        font-size: 12px; 
+        white-space: normal; 
         line-height: 1.2;
     }
     
@@ -397,7 +484,7 @@ header h1 {
     }
 
     /* 3. SIDEBAR DI HP: Vertical Compact (Lebar 90px) */
-    :root { --sidebar-width: 90px; } /* Lebar diperkecil maksimal */
+    :root { --sidebar-width: 90px; } 
     
     .sidebar {
         width: var(--sidebar-width); 
@@ -412,10 +499,10 @@ header h1 {
     }
 
     .sidebar button {
-        padding: 10px 5px; /* Padding kecil */
-        font-size: 10px; /* Teks sangat kecil */
+        padding: 10px 5px; 
+        font-size: 10px; 
         text-align: center;
-        flex-direction: column; /* Ikon di atas teks */
+        flex-direction: column; 
         line-height: 1.1;
         border-left: 3px solid transparent; 
         margin: 3px 0;
@@ -435,10 +522,17 @@ header h1 {
     }
     
     .content-area {
-        padding: 10px; /* Padding konten lebih kecil */
-        width: calc(100% - var(--sidebar-width)); /* Memastikan konten mengisi sisa ruang */
+        padding: 10px; 
+        width: calc(100% - var(--sidebar-width)); 
     }
     
+    /* 4. PERBAIKAN GRAFIK GABUNGAN DI HP */
+    .card:has(#mixedChart) {
+        /* Memastikan grafik gabungan mendapat ruang yang layak di HP */
+        height: 350px; 
+        min-height: 350px;
+    }
+
     /* Perbaikan tata letak tombol kontrol */
     .control-bar {
         justify-content: space-between;
@@ -450,13 +544,18 @@ header h1 {
     }
     .interval-label {
         margin-left: 0;
-        width: 100%; /* Memastikan ini berada di baris baru */
+        width: 100%; 
         justify-content: flex-end;
         margin-top: 5px;
     }
     
     .card .value {
         font-size: 1.8em; 
+    }
+    
+    /* Perbaikan Grid Anggota di HP */
+    .member-grid {
+        grid-template-columns: 1fr;
     }
 }
 </style>
@@ -488,6 +587,7 @@ header h1 {
         <button class="tablinks active" onclick="openTab(event, 'dashboard')"><i class="fas fa-chart-line"></i> Dashboard</button>
         <button class="tablinks" onclick="openTab(event, 'cahaya')"><i class="fas fa-sun"></i> Cahaya</button>
         <button class="tablinks" onclick="openTab(event, 'nutrisi')"><i class="fas fa-tint"></i> Nutrisi</button>
+        <button class="tablinks" onclick="openTab(event, 'about-us')"><i class="fas fa-users"></i> Tentang Kami</button>
     </nav>
 
     <div class="content-area">
@@ -520,7 +620,7 @@ header h1 {
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card" style="min-height: 400px;">
                 <canvas id="mixedChart"></canvas>
             </div>
         </div>
@@ -532,7 +632,7 @@ header h1 {
                 <p id="ldrStatus" style="margin-top: 15px;">Status: -</p>
             </div>
 
-            <div class="card">
+            <div class="card" style="min-height: 400px;">
                 <canvas id="ldrChart"></canvas>
             </div>
         </div>
@@ -544,12 +644,45 @@ header h1 {
                 <p id="tdsStatus" style="margin-top: 15px;">Status: -</p>
             </div>
 
-            <div class="card">
+            <div class="card" style="min-height: 400px;">
                 <canvas id="tdsChart"></canvas>
             </div>
         </div>
 
-    </div>
+        <div id="about-us" class="content">
+            <h2><i class="fas fa-info-circle"></i> Tentang Proyek</h2>
+            <div class="project-description">
+                Proyek ini bertujuan untuk merancang dan membangun sebuah sistem monitoring real-time pada budidaya hidroponik sawi skala kecil.
+                Sistem ini meliputi pengukuran intensitas cahaya (LUX) dan konsentrasi nutrisi larutan (PPM), serta menampilkan data melalui antarmuka web yang interaktif.
+                <br><br>
+                Dashboard ini dibuat sebagai bagian dari Tugas Akhir Mata Kuliah Prototipe Produk Elektronika.
+            </div>
+
+            <h3><i class="fas fa-users"></i> Kelompok 5</h3>
+            
+            <div class="member-grid">
+                
+                <div class="member-card">
+                    <div class="profile-img-placeholder" title="Placeholder Foto"><i class="fas fa-user-circle"></i></div>
+                    <p class="member-name">Luthfan Alifiansyah Ristian</p>
+                    <p class="member-nim">NIM: 230935605939</p>
+                </div>
+
+                <div class="member-card">
+                    <div class="profile-img-placeholder" title="Placeholder Foto"><i class="fas fa-user-circle"></i></div>
+                    <p class="member-name">Mohammad Zulfahmi Yahya</p>
+                    <p class="member-nim">NIM: 230935604725</p>
+                </div>
+
+                <div class="member-card">
+                    <div class="profile-img-placeholder" title="Placeholder Foto"><i class="fas fa-user-circle"></i></div>
+                    <p class="member-name">Siti Rohmatul Sholaikah</p>
+                    <p class="member-nim">NIM: 230935605891</p>
+                </div>
+
+            </div>
+        </div>
+        </div>
 </div> 
 
 <script>
@@ -585,6 +718,11 @@ function loadDarkModePreference() {
 }
 
 function updateChartTheme() {
+    // Pastikan Chart.js sudah diinisialisasi sebelum memanggil fungsi ini
+    if (typeof ldrChart === 'undefined' || typeof tdsChart === 'undefined' || typeof mixedChart === 'undefined') {
+        return; 
+    }
+    
     const isDarkMode = document.body.classList.contains('dark-mode');
     const textColor = getComputedStyle(document.body).getPropertyValue('--text-dark');
     const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
@@ -607,6 +745,7 @@ function updateChartTheme() {
             chart.options.scales.yTDS.ticks.color = textColor;
             chart.options.scales.yTDS.title.color = textColor;
 
+            // Pastikan legend dan title di mixed chart juga mengikuti tema
             chart.options.plugins.legend.labels.color = textColor;
             chart.options.plugins.title.color = textColor;
         }
@@ -759,7 +898,8 @@ const mixedChart = new Chart(mixedCtx, {
 
 /* =============== FETCH DATA / CONTROL SYSTEM =============== */
 
-const ESP32_URL = "http://192.168.4.1/data";
+// Hapus atau ganti URL ini jika Anda menggunakan koneksi fisik ESP32
+const ESP32_URL = "http://192.168.4.1/data"; 
 let isPaused = false;
 let interval = 1000;
 let timer = null; 
@@ -768,7 +908,9 @@ const MAX_CHART_POINTS = 15;
 const MAX_EXCEL_POINTS = 1000; 
 
 function simulateData() {
+    // Simulasi data LDR antara 300 - 1000 lux
     let randomLdr = Math.floor(Math.random() * (1000 - 300 + 1)) + 300;
+    // Simulasi data TDS antara 500 - 1200 ppm
     let randomTds = Math.floor(Math.random() * (1200 - 500 + 1)) + 500;
     return { ldr: randomLdr, tds: randomTds };
 }
@@ -778,18 +920,21 @@ async function getSensorData() {
 
     let ldr, tds;
     
+    // Gunakan simulasi data untuk demonstrasi UI
     let data = simulateData(); 
     ldr = data.ldr;
     tds = data.tds;
     
-    /* UN-COMMENT jika menggunakan ESP32/NodeMCU:
+    /* UN-COMMENT kode di bawah ini jika Anda sudah mengintegrasikannya dengan ESP32/NodeMCU 
+    dan hapus baris `let data = simulateData();` di atas:
+    
     try {
         const response = await fetch(ESP32_URL);
         const data = await response.json();
         ldr = data.ldr; 
         tds = data.tds; 
     } catch (error) {
-        console.error("Gagal mengambil data dari ESP32:", error);
+        console.error("Gagal mengambil data dari ESP32, menggunakan data simulasi:", error);
         let data = simulateData(); 
         ldr = data.ldr;
         tds = data.tds;

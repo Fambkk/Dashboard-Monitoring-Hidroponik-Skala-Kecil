@@ -6,13 +6,14 @@
 <title>Monitoring Hidroponik Sawi - UI Dinamis</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <style>
 /* ---------------------------------------------------
-   PALET WARNA UTAMA (MODE TERANG)
+    PALET WARNA UTAMA (MODE TERANG)
 --------------------------------------------------- */
 :root {
     --primary-green: #16a085; /* Hijau Utama */
@@ -38,7 +39,7 @@
 }
 
 /* ---------------------------------------------------
-   MODE GELAP
+    MODE GELAP
 --------------------------------------------------- */
 .dark-mode {
     --bg-light: #121212;
@@ -60,7 +61,7 @@
 
 
 /* ---------------------------------------------------
-   BODY dan STRUKTUR UMUM
+    BODY dan STRUKTUR UMUM
 --------------------------------------------------- */
 body {
     margin: 0;
@@ -71,7 +72,7 @@ body {
 }
 
 /* ---------------------------------------------------
-   HEADER
+    HEADER
 --------------------------------------------------- */
 header {
     background: linear-gradient(90deg, #1abc9c, var(--primary-green));
@@ -116,11 +117,13 @@ header::before {
     flex-grow: 1; 
 }
 
+/* Perbaikan 1: Memastikan logo UM terkunci ukurannya dan statis */
 .logo-um { 
-    width: 80px; 
+    width: 50px !important; /* Diperkecil dari 80px */
     height: auto; 
-    margin-right: 20px; 
+    margin-right: 15px; /* Sedikit dimodifikasi */
     flex-shrink: 0; 
+    position: static !important; /* Memastikan posisinya normal */
 }
 
 .title-container {
@@ -163,7 +166,7 @@ header h1 {
 }
 
 /* ---------------------------------------------------
-   MAIN WRAPPER (CONTAINER UTAMA)
+    MAIN WRAPPER (CONTAINER UTAMA)
 --------------------------------------------------- */
 .main-wrapper {
     display: flex;
@@ -172,7 +175,7 @@ header h1 {
 }
 
 /* ---------------------------------------------------
-   SIDEBAR (Menu Navigasi Vertical - PC/Desktop)
+    SIDEBAR (Menu Navigasi Vertical - PC/Desktop)
 --------------------------------------------------- */
 .sidebar {
     width: var(--sidebar-width);
@@ -226,11 +229,19 @@ header h1 {
 }
 
 /* ---------------------------------------------------
-   CONTENT AREA & CARDS
+    CONTENT AREA & CARDS
 --------------------------------------------------- */
 .content-area {
     flex-grow: 1;
     padding: 25px 30px;
+    position: relative; /* Agar z-index bekerja dengan baik di dalam wrapper */
+    z-index: 1; /* Di bawah header */
+}
+
+/* Perbaikan 2: Memastikan konten tab default tersembunyi kecuali saat dipanggil */
+.content {
+    display: none; 
+    /* Hilangkan display:block di HTML, karena akan diatur oleh JS pada initPage */
 }
 
 .dashboard-grid {
@@ -351,7 +362,7 @@ header h1 {
 }
 
 /* ---------------------------------------------------
-   TENTANG KAMI
+    TENTANG KAMI
 --------------------------------------------------- */
 #about-us {
     padding: 30px;
@@ -433,7 +444,7 @@ header h1 {
 
 
 /* ---------------------------------------------------
-   MEDIA QUERIES (RESPONSIVE)
+    MEDIA QUERIES (RESPONSIVE)
 --------------------------------------------------- */
 @media (max-width: 992px) {
     header h1 { font-size: 18px; }
@@ -584,7 +595,7 @@ header h1 {
 <div class="main-wrapper">
     
     <nav class="sidebar">
-        <button class="tablinks active" onclick="openTab(event, 'dashboard')"><i class="fas fa-chart-line"></i> Dashboard</button>
+        <button class="tablinks" onclick="openTab(event, 'dashboard')"><i class="fas fa-chart-line"></i> Dashboard</button>
         <button class="tablinks" onclick="openTab(event, 'cahaya')"><i class="fas fa-sun"></i> Cahaya</button>
         <button class="tablinks" onclick="openTab(event, 'nutrisi')"><i class="fas fa-tint"></i> Nutrisi</button>
         <button class="tablinks" onclick="openTab(event, 'about-us')"><i class="fas fa-users"></i> Tentang Kami</button>
@@ -592,7 +603,7 @@ header h1 {
 
     <div class="content-area">
         
-        <div id="dashboard" class="content" style="display:block;">
+        <div id="dashboard" class="content">
 
             <div class="control-bar">
                 <button class="control-btn pause" id="pauseBtn" onclick="togglePause()"><i class="fas fa-pause"></i> Pause Live</button>
@@ -600,10 +611,10 @@ header h1 {
                 <button class="control-btn export" onclick="downloadExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
                 <label for="intervalSel" class="interval-label">Update interval: 
                     <select id="intervalSel" onchange="updateIntervalFromSelect()">
-                      <option value="5000">5s</option>
-                      <option value="2000">2s</option>
-                      <option value="1000" selected>1s</option>
-                      <option value="500">0.5s</option>
+                        <option value="5000">5s</option>
+                        <option value="2000">2s</option>
+                        <option value="1000" selected>1s</option>
+                        <option value="500">0.5s</option>
                     </select>
                 </label>
             </div>
@@ -682,10 +693,37 @@ header h1 {
 
             </div>
         </div>
-        </div>
-</div> 
+    </div>
+</div>
 
 <script>
+/* ================= INISIALISASI HALAMAN ================= */
+let ldrChart, tdsChart, mixedChart; // Dideklarasikan di luar agar dapat diakses oleh semua fungsi
+
+function initPage() {
+    loadDarkModePreference();
+    
+    // Secara default, buka tab Dashboard saat halaman dimuat
+    const defaultTab = document.querySelector('.tablinks');
+    const defaultContent = document.getElementById('dashboard');
+
+    if (defaultTab && defaultContent) {
+        // Tampilkan Dashboard
+        defaultContent.style.display = 'block';
+        defaultTab.classList.add('active');
+    }
+
+    // Panggil fungsi untuk setup chart setelah DOM siap
+    setupCharts();
+    
+    // Mulai pengambilan data (timer)
+    updateIntervalFromSelect(); 
+}
+
+// Panggil fungsi inisialisasi saat semua sumber daya dimuat
+window.onload = initPage;
+
+
 /* ================= DARK MODE FUNCTIONALITY ================= */
 function toggleDarkMode() {
     const body = document.body;
@@ -710,16 +748,15 @@ function loadDarkModePreference() {
 
     if (savedMode === 'true' || (savedMode === null && prefersDark)) {
         document.body.classList.add('dark-mode');
-        toggleButton.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+        if(toggleButton) toggleButton.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
     } else {
-        toggleButton.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+        if(toggleButton) toggleButton.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
     }
-    updateChartTheme();
 }
 
 function updateChartTheme() {
-    // Pastikan Chart.js sudah diinisialisasi sebelum memanggil fungsi ini
-    if (typeof ldrChart === 'undefined' || typeof tdsChart === 'undefined' || typeof mixedChart === 'undefined') {
+    // Pastikan Chart.js sudah diinisialisasi
+    if (!ldrChart || !tdsChart || !mixedChart) {
         return; 
     }
     
@@ -728,15 +765,18 @@ function updateChartTheme() {
     const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
 
     [ldrChart, tdsChart, mixedChart].forEach(chart => {
+        // Update Grid dan Ticks untuk sumbu X
         chart.options.scales.x.grid.color = gridColor;
         chart.options.scales.x.ticks.color = textColor;
         
+        // Update Sumbu Y (ldrChart dan tdsChart)
         if (chart === ldrChart || chart === tdsChart) {
              chart.options.scales.y.grid.color = gridColor;
              chart.options.scales.y.ticks.color = textColor;
              chart.options.scales.y.title.color = textColor;
         }
 
+        // Update Sumbu Y (mixedChart)
         if (chart === mixedChart) {
             chart.options.scales.yLDR.grid.color = gridColor;
             chart.options.scales.yLDR.ticks.color = textColor;
@@ -745,7 +785,7 @@ function updateChartTheme() {
             chart.options.scales.yTDS.ticks.color = textColor;
             chart.options.scales.yTDS.title.color = textColor;
 
-            // Pastikan legend dan title di mixed chart juga mengikuti tema
+            // Update legend dan title di mixed chart
             chart.options.plugins.legend.labels.color = textColor;
             chart.options.plugins.title.color = textColor;
         }
@@ -754,151 +794,168 @@ function updateChartTheme() {
 }
 
 
-/* ================= TAB / SIDEBAR FUNCTION ================= */
+/* ================= TAB / SIDEBAR FUNCTION (PERBAIKAN UTAMA) ================= */
 function openTab(evt, tabName) {
     let i, content, tablinks;
 
+    // 1. Sembunyikan semua elemen dengan class "content"
     content = document.getElementsByClassName("content");
-    for (i = 0; i < content.length; i++) content[i].style.display = "none";
+    for (i = 0; i < content.length; i++) {
+        content[i].style.display = "none";
+    }
 
+    // 2. Hapus class "active" dari semua tombol sidebar
     tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++)
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].classList.remove("active");
+    }
 
-    document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.className += " active";
+    // 3. Tampilkan elemen yang dipilih
+    const selectedContent = document.getElementById(tabName);
+    if (selectedContent) {
+        selectedContent.style.display = "block";
+    }
+
+    // 4. Tambahkan class "active" pada tombol yang diklik
+    if (evt && evt.currentTarget) {
+        evt.currentTarget.classList.add("active");
+    }
 }
 
 /* ================= CHART SETUP ================= */
-const baseChartOptions = { 
-    responsive: true, 
-    maintainAspectRatio: false, 
-    borderWidth: 2, 
-    tension: 0.4, 
-    plugins: {
-        legend: { display: false },
-        title: { display: false }
-    },
-    scales: {
-        x: {
-            title: { display: true, text: 'Waktu' },
-            ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 6 },
-            grid: { drawOnChartArea: true }
-        },
-        y: { 
-            beginAtZero: true,
-            title: { display: true, text: '' }, 
-            grid: { drawOnChartArea: true }
-        }
-    }
-};
-
-const ldrCtx = document.getElementById('ldrChart').getContext('2d');
-const ldrChart = new Chart(ldrCtx, {
-    type: 'line',
-    data: { 
-        labels: [], 
-        datasets: [{ 
-            label: 'LDR (lux)', 
-            data: [], 
-            borderColor: '#3498db', 
-            backgroundColor: 'rgba(52, 152, 219, 0.2)',
-            fill: true
-        }] 
-    },
-    options: JSON.parse(JSON.stringify(baseChartOptions)) 
-});
-ldrChart.options.scales.y.title.text = 'LDR (lux)';
-
-
-const tdsCtx = document.getElementById('tdsChart').getContext('2d');
-const tdsChart = new Chart(tdsCtx, {
-    type: 'line',
-    data: { 
-        labels: [], 
-        datasets: [{ 
-            label: 'TDS (ppm)', 
-            data: [], 
-            borderColor: '#e74c3c', 
-            backgroundColor: 'rgba(231, 76, 60, 0.2)',
-            fill: true
-        }] 
-    },
-    options: JSON.parse(JSON.stringify(baseChartOptions))
-});
-tdsChart.options.scales.y.title.text = 'TDS (ppm)';
-
-
-const mixedCtx = document.getElementById('mixedChart').getContext('2d');
-const mixedChart = new Chart(mixedCtx, {
-    type: 'line',
-    data: {
-        labels: [],
-        datasets: [
-            {
-                label: 'Intensitas Cahaya (lux)',
-                data: [],
-                borderColor: '#3498db',
-                backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                yAxisID: 'yLDR',
-                tension: 0.4,
-                pointRadius: 2,
-                fill: false,
-            },
-            {
-                label: 'Konsentrasi Larutan (ppm)',
-                data: [],
-                borderColor: '#e74c3c',
-                backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                yAxisID: 'yTDS',
-                tension: 0.4,
-                pointRadius: 2,
-                fill: false,
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
+function setupCharts() {
+    const baseChartOptions = { 
+        responsive: true, 
+        maintainAspectRatio: false, 
+        borderWidth: 2, 
+        tension: 0.4, 
         plugins: {
-            legend: {
-                display: true,
-                position: 'top',
-                labels: { usePointStyle: true, color: 'var(--text-dark)' }
-            },
-            title: {
-                display: true,
-                text: 'Grafik Gabungan Data Sensor',
-                color: 'var(--text-dark)'
-            }
+            legend: { display: false },
+            title: { display: false }
         },
         scales: {
             x: {
                 title: { display: true, text: 'Waktu' },
                 ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 6 },
-            },
-            yLDR: {
-                type: 'linear',
-                position: 'left',
-                title: { display: true, text: 'LDR (lux)' },
-                beginAtZero: true,
                 grid: { drawOnChartArea: true }
             },
-            yTDS: {
-                type: 'linear',
-                position: 'right',
-                title: { display: true, text: 'TDS (ppm)' },
+            y: { 
                 beginAtZero: true,
-                grid: { drawOnChartArea: false } 
+                title: { display: true, text: '' }, 
+                grid: { drawOnChartArea: true }
             }
         }
-    }
-});
+    };
+
+    const ldrCtx = document.getElementById('ldrChart').getContext('2d');
+    ldrChart = new Chart(ldrCtx, {
+        type: 'line',
+        data: { 
+            labels: [], 
+            datasets: [{ 
+                label: 'LDR (lux)', 
+                data: [], 
+                borderColor: '#3498db', 
+                backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                fill: true
+            }] 
+        },
+        options: JSON.parse(JSON.stringify(baseChartOptions)) 
+    });
+    ldrChart.options.scales.y.title.text = 'LDR (lux)';
+
+
+    const tdsCtx = document.getElementById('tdsChart').getContext('2d');
+    tdsChart = new Chart(tdsCtx, {
+        type: 'line',
+        data: { 
+            labels: [], 
+            datasets: [{ 
+                label: 'TDS (ppm)', 
+                data: [], 
+                borderColor: '#e74c3c', 
+                backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                fill: true
+            }] 
+        },
+        options: JSON.parse(JSON.stringify(baseChartOptions))
+    });
+    tdsChart.options.scales.y.title.text = 'TDS (ppm)';
+
+
+    const mixedCtx = document.getElementById('mixedChart').getContext('2d');
+    mixedChart = new Chart(mixedCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Intensitas Cahaya (lux)',
+                    data: [],
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    yAxisID: 'yLDR',
+                    tension: 0.4,
+                    pointRadius: 2,
+                    fill: false,
+                },
+                {
+                    label: 'Konsentrasi Larutan (ppm)',
+                    data: [],
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    yAxisID: 'yTDS',
+                    tension: 0.4,
+                    pointRadius: 2,
+                    fill: false,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: { usePointStyle: true, color: 'var(--text-dark)' }
+                },
+                title: {
+                    display: true,
+                    text: 'Grafik Gabungan Data Sensor',
+                    color: 'var(--text-dark)'
+                }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Waktu' },
+                    ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 6 },
+                },
+                yLDR: {
+                    type: 'linear',
+                    position: 'left',
+                    title: { display: true, text: 'LDR (lux)' },
+                    beginAtZero: true,
+                    grid: { drawOnChartArea: true }
+                },
+                yTDS: {
+                    type: 'linear',
+                    position: 'right',
+                    title: { display: true, text: 'TDS (ppm)' },
+                    beginAtZero: true,
+                    grid: { drawOnChartArea: false } 
+                }
+            }
+        }
+    });
+
+    // Terapkan tema chart saat inisialisasi
+    updateChartTheme();
+}
 
 
 /* =============== FETCH DATA / CONTROL SYSTEM =============== */
 
-// Hapus atau ganti URL ini jika Anda menggunakan koneksi fisik ESP32
 const ESP32_URL = "http://192.168.4.1/data"; 
 let isPaused = false;
 let interval = 1000;
@@ -976,6 +1033,9 @@ function updateIntervalFromSelect() {
         clearInterval(timer);
         timer = setInterval(getSensorData, interval);
         console.log("Interval diperbarui menjadi " + interval + " ms");
+    } else if (timer === null) {
+        // Hanya dijalankan sekali saat inisialisasi untuk memulai timer
+        timer = setInterval(getSensorData, interval);
     }
 }
 
@@ -1077,27 +1137,14 @@ function updateMixedChart(ldr, tds) {
     
     if (mixedChart.data.labels.length >= MAX_CHART_POINTS) {
         mixedChart.data.labels.shift();
-        mixedChart.data.datasets[0].data.shift();
-        mixedChart.data.datasets[1].data.shift();
+        mixedChart.data.datasets[0].data.shift(); // LDR
+        mixedChart.data.datasets[1].data.shift(); // TDS
     }
     mixedChart.data.labels.push(time);
     mixedChart.data.datasets[0].data.push(ldr);
     mixedChart.data.datasets[1].data.push(tds);
     mixedChart.update('none');
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadDarkModePreference(); 
-    
-    document.getElementById('intervalSel').value = '1000';
-    interval = 1000;
-    timer = setInterval(getSensorData, interval);
-
-    const defaultTabButton = document.querySelector('.sidebar button.active');
-    if (defaultTabButton) {
-        openTab({ currentTarget: defaultTabButton }, 'dashboard');
-    }
-});
 </script>
 </body>
 </html>
